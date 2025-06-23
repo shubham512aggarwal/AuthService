@@ -17,6 +17,17 @@ builder.Services.AddDbContext<AuthDbContext>(options => options.UseNpgsql(builde
 builder.Services.AddScoped<AuthManager>();
 builder.Services.AddScoped<JwtTokenHelper>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSandeshRequest", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -25,6 +36,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowSandeshRequest");
 
 app.UseHttpsRedirection();
 

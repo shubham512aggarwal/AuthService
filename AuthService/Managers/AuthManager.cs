@@ -82,12 +82,13 @@ namespace AuthService.Managers
                     _logger.LogError("Password is incorrect");
                     return null;
                 }
-                HandleTokenCreation(user, response);
+                string token = await HandleTokenCreation(user, response);
                 return new AuthResponse
                 {
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
-                    Username = user.Username
+                    Username = user.Username,
+                    Token = token
                 };
             }
             catch (Exception ex)
@@ -157,12 +158,13 @@ namespace AuthService.Managers
                     _logger.LogError("User not found with this refresh token");
                     return null;
                 }
-                HandleTokenCreation(user, response);
+                string token = await HandleTokenCreation(user, response);
                 return new AuthResponse
                 {
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
-                    Username = user.Username
+                    Username = user.Username,
+                    Token = token
                 };
             }
             catch (Exception ex)
@@ -172,7 +174,7 @@ namespace AuthService.Managers
             }
         }
 
-        private async Task HandleTokenCreation(User user, HttpResponse response)
+        private async Task<string> HandleTokenCreation(User user, HttpResponse response)
         {
             string token = _jwtTokenGenerator.GenerateUserToken(user);
             response.Cookies.Append("accessToken", token, new CookieOptions
@@ -197,6 +199,7 @@ namespace AuthService.Managers
                 SameSite = SameSiteMode.None,
                 Expires = user.RefreshTokenExpiryTime
             });
+            return token;
         }
     }
 }
